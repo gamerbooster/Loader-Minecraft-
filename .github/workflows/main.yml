@@ -38,6 +38,17 @@ jobs:
         with:
           gradle-version: '8.13'
 
+      - name: Extraer NEXLoader
+        run: |
+          echo "=== ARCHIVOS DEL REPOSITORIO ==="
+          ls -lah
+
+          echo "=== EXTRAER ZIP ==="
+          unzip -q NEXLoader-7.8.0-source.zip -d extracted
+
+          echo "=== CONTENIDO EXTRAIDO ==="
+          find extracted -maxdepth 2 -type d | sort
+
       - name: Revisar proyecto
         run: |
           echo "=== JAVA ==="
@@ -46,25 +57,29 @@ jobs:
           echo "=== GRADLE ==="
           gradle --version
 
-          echo "=== PROYECTO ==="
-          ls -la
+          echo "=== PROYECTO NEXLOADER ==="
+          ls -lah extracted/NEXLoader-7.8.0
 
           echo "=== ANDROID ==="
-          ls -la android
+          ls -lah extracted/NEXLoader-7.8.0/android
 
       - name: Construir APK
         run: |
-          gradle -p android :app:assembleDebug --no-daemon --stacktrace
+          gradle \
+            -p extracted/NEXLoader-7.8.0/android \
+            :app:assembleDebug \
+            --no-daemon \
+            --stacktrace
 
       - name: Comprobar APK
         run: |
           echo "=== APK GENERADO ==="
-          ls -lh android/app/build/outputs/apk/debug/
-          test -f android/app/build/outputs/apk/debug/app-debug.apk
+          ls -lh extracted/NEXLoader-7.8.0/android/app/build/outputs/apk/debug/
+          test -f extracted/NEXLoader-7.8.0/android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
           name: NEXLoader-7.8.0-debug
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: extracted/NEXLoader-7.8.0/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
